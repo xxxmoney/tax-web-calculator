@@ -16,8 +16,26 @@ class CalculateController extends Controller
     {
         $items = Tax::all();
 
+        $types = ['fields', 'classic', 'duo', 'other'];
+
+        // Calculate average result for each type.
+        $averageResults = [
+            ['type' => 'fields', 'result' => 0],
+            ['type' => 'classic', 'result' => 0],
+            ['type' => 'duo', 'result' => 0],
+            ['type' => 'other', 'result' => 0]
+        ];
+        foreach ($items as $item) {
+            foreach ($averageResults as $key => $averageResult) {
+                if ($averageResult['type'] == $item->type) {
+                    $averageResults[$key]['result'] += $item->result;
+                }
+            }
+        }
+
         return view('calculate.index', [
-            'items' => $items
+            'items' => $items,
+            'averageResults' => $averageResults
         ]);
     }
 
@@ -42,21 +60,34 @@ class CalculateController extends Controller
             'price' => 'required',
             'type' => 'required',
             'coeficient' => 'required',
-            'yearly_tax' => 'required',
-            'result' => 'required'
         ]);
 
         $item = new Tax();
         $item->price = $request->price;
         $item->type = $request->type;
         $item->coeficient = $request->coeficient;
-        $item->yearly_tax = $request->yearly_tax;
 
         // Calculate result.
-        $item->result = $item->price * $item->coeficient * $item->yearly_tax;
+        $baseTaxCoeficient;
+        switch ($item->type) {
+            case 'fields':
+                $baseTaxCoeficient = 6;
+                break;
+            case 'classic':
+                $baseTaxCoeficient = 2.6;
+                break;
+            case 'duo':
+                $baseTaxCoeficient = 3.1;
+                break;
+            case 'other':
+                $baseTaxCoeficient = 3.5;
+                break;
+        }
+        $baseTax = $item->price * ($baseTaxCoeficient / 1000);
+        $item->result = $baseTax * ($item->coeficient / 100);
 
         $item->save();
 
-        return redirect()->route('calculate');
+        return redirect()->route('calculations');
     }
 }

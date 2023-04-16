@@ -20,4 +20,4 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 
 Route::get('/calculations', [App\Http\Controllers\CalculateController::class, 'index'])->name('calculations');
 Route::get('/calculations/create', [App\Http\Controllers\CalculateController::class, 'showCreate'])->name('calculation_show_create');
-Route::post('/calculations/insert', [App\Http\Controllers\ArticleController::class, 'insert'])->name('calculation_insert');
+Route::post('/calculations/insert', [App\Http\Controllers\CalculateController::class, 'insert'])->name('calculation_insert');
